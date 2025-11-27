@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarma Interactiva</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>⏰ Alarma Interactiva</h1>
+        
+        <div class="alarm-display">
+            <div class="time-display" id="timeDisplay">00:00:00</div>
+            <div class="period-indicator" id="periodIndicator">PM</div>
+            <div class="greeting" id="greeting">Buenos días</div>
+            <div class="alarm-status" id="alarmStatus">Inactiva</div>
+        </div>
+
+        <div class="alarm-setup">
+            <div class="input-group">
+                <label for="hours">Horas:</label>
+                <input type="number" id="hours" min="0" max="23" value="07">
+            </div>
+            <div class="input-group">
+                <label for="minutes">Minutos:</label>
+                <input type="number" id="minutes" min="0" max="59" value="00">
+            </div>
+            <div class="input-group">
+                <label for="seconds">Segundos:</label>
+                <input type="number" id="seconds" min="0" max="59" value="00">
+            </div>
+        </div>
+
+        <div class="sound-selector">
+            <label for="soundSelect">Sonido:</label>
+            <select id="soundSelect">
+                <option value="bell">🔔 Campana</option>
+                <option value="alarm">📢 Alarma Clásica</option>
+                <option value="buzzer">🔊 Timbre</option>
+                <option value="ding">✨ Ding</option>
+            </select>
+        </div>
+
+        <div class="volume-control">
+            <label for="volumeSlider">Volumen: <span id="volumeValue">70</span>%</label>
+            <input type="range" id="volumeSlider" min="0" max="100" value="70">
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-start" id="startBtn">Iniciar</button>
+            <button class="btn btn-stop" id="stopBtn">Detener</button>
+            <button class="btn btn-reset" id="resetBtn">Reiniciar</button>
+        </div>
+
+        <div class="alarm-list" id="alarmList"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
