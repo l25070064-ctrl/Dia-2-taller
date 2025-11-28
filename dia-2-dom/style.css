@@ -1,0 +1,20 @@
+:root{
+  --bg:#ffffff;
+  --card:#7316ca;
+  --accent:#2563eb;
+  --danger:#dc2626;
+  --text:#0f172a;
+}
+*{box-sizing:border-box;font-family:Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--text)}
+.calculator{width:320px;max-width:95%;background:var(--card);padding:20px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.08);text-align:center}
+.calculator h1{margin:0 0 12px;font-size:20px}
+.inputs{display:flex;gap:8px;margin-bottom:12px}
+.inputs input{flex:1;padding:10px;border:1px solid #000000;border-radius:8px;font-size:16px}
+.ops{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px}
+.ops button{padding:10px 14px;border-radius:8px;border:1px solid #000000;background:#5c5757;cursor:pointer;font-size:16px}
+.ops button.active{background:var(--accent);color:#000000;border-color:transparent}
+.ops button#equals{background:var(--accent);color:#000000;border-color:transparent}
+#clear{background:#fff;border:1px solid #000000}
+.result{min-height:28px;padding:8px;border-radius:6px;background:#f8fafc;border:1px dashed #e6eef8;margin-bottom:8px;font-weight:600}
+.error{color:var(--danger);min-height:18px;font-size:14px}
