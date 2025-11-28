@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐱 Cuidando a Taco - Tamagotchi</title>
+    <meta name="description"
+        content="Cuida a Taco, tu mascota virtual. Aliméntalo, juega con él y mantén su felicidad.">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Estrellas de fondo */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .game-container {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            font-size: 2.5rem;
+            color: #ff6b9d;
+            text-shadow: 3px 3px 0px #fff, 6px 6px 0px rgba(255, 107, 157, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .game-subtitle {
+            font-size: 1.2rem;
+            color: #c44569;
+            font-weight: 400;
+        }
+
+        .stats-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .time-alive {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .record {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #ff6b9d;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .stat-bar {
+            margin-bottom: 15px;
+        }
+
+        .stat-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            transition: width 0.5s ease, background-color 0.5s ease;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .progress-fill.green {
+            background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%);
+        }
+
+        .progress-fill.yellow {
+            background: linear-gradient(90deg, #f2994a 0%, #f2c94c 100%);
+        }
+
+        .progress-fill.red {
+            background: linear-gradient(90deg, #eb3349 0%, #f45c43 100%);
+        }
+
+        .taco-container {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .taco-character {
+            font-size: 8rem;
+            animation: float 3s ease-in-out infinite;
+            display: inline-block;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .taco-character.shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        .thought-bubble {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 400px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .thought-bubble:before {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 20px solid white;
+        }
+
+        .thought-text {
+            font-size: 1.3rem;
+            color: #555;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .actions-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .action-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .action-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .action-button:active {
+            transform: translateY(-2px);
+        }
+
+        .action-button.feed {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .action-button.sleep {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .action-button.play {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .action-button.medicine {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .achievements {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievements-title {
+            font-size: 1.2rem;
+            color: #667eea;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .achievement-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .achievement {
+            background: #f0f0f0;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #999;
+            transition: all 0.3s ease;
+        }
+
+        .achievement.unlocked {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .game-over-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .game-over-overlay.active {
+            display: flex;
+        }
+
+        .game-over-content {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .game-over-title {
+            font-size: 2.5rem;
+            color: #ff6b9d;
+            margin-bottom: 20px;
+        }
+
+        .game-over-message {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .restart-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            font-family: 'Fredoka', sans-serif;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .restart-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .day-night-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2rem;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+
+            .game-title {
+                font-size: 2rem;
+            }
+
+            .taco-character {
+                font-size: 6rem;
+            }
+
+            .actions-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Partículas de efectos */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            animation: particleFloat 1s ease-out forwards;
+            font-size: 2rem;
+            z-index: 999;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) scale(0.5);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Estrellas de fondo -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Contenedor principal del juego -->
+    <div class="game-container">
+        <div class="day-night-indicator" id="dayNightIndicator">☀️</div>
+
+        <div class="game-header">
+            <h1 class="game-title">🐱 Cuidando a Taco</h1>
+            <p class="game-subtitle">Tu mascota virtual kawaii</p>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-container">
+            <div class="time-alive" id="timeAlive">⏱️ Tiempo vivo: 0s</div>
+            <div class="record" id="record">🏆 Récord: 0s</div>
+
+            <!-- Barra de Hambre -->
+            <div class="stat-bar">
+                <div class="stat-label">
+                    <span>🍕 Hambre</span>
+                    <span class="stat-value" id="hungerValue">50</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill yellow" id="hungerBar" style="width: 50%">50</div>
+                </div>
+            </div>
+
+            <!-- Barra de Energía -->
+            <div class="stat-bar">
+                <div class="stat-label">
+                    <span>⚡ Energía</span>
+                    <span class="stat-value" id="energyValue">50</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill yellow" id="energyBar" style="width: 50%">50</div>
+                </div>
+            </div>
+
+            <!-- Barra de Felicidad -->
+            <div class="stat-bar">
+                <div class="stat-label">
+                    <span>😸 Felicidad</span>
+                    <span class="stat-value" id="happinessValue">50</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill yellow" id="happinessBar" style="width: 50%">50</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personaje Taco -->
+        <div class="taco-container">
+            <div class="taco-character" id="tacoCharacter">😺</div>
+            <div class="thought-bubble">
+                <p class="thought-text" id="thoughtText">¡Hola! Soy Taco 🐱</p>
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="actions-container">
+            <button class="action-button feed" id="feedButton">
+                🍕 Alimentar
+            </button>
+            <button class="action-button sleep" id="sleepButton">
+                😴 Dormir
+            </button>
+            <button class="action-button play" id="playButton">
+                🎮 Jugar
+            </button>
+            <button class="action-button medicine" id="medicineButton">
+                💊 Medicina
+            </button>
+        </div>
+
+        <!-- Logros -->
+        <div class="achievements">
+            <h3 class="achievements-title">🏆 Logros</h3>
+            <div class="achievement-list">
+                <span class="achievement" id="achievement30s">⏱️ 30s</span>
+                <span class="achievement" id="achievement1min">⏱️ 1min</span>
+                <span class="achievement" id="achievement3min">⏱️ 3min</span>
+                <span class="achievement" id="achievement5min">⏱️ 5min</span>
+                <span class="achievement" id="achievement10min">⏱️ 10min</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay de Game Over -->
+    <div class="game-over-overlay" id="gameOverOverlay">
+        <div class="game-over-content">
+            <div class="game-over-title">💔 Game Over</div>
+            <div class="game-over-message" id="gameOverMessage">
+                Taco necesita más cuidados...
+            </div>
+            <button class="restart-button" id="restartButton">
+                🔄 Jugar de Nuevo
+            </button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

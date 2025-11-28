@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Libros - Open Library</title>
+    <meta name="description" content="Busca libros, autores y portadas usando la API de Open Library">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background-color: #f5f1e8;
+            color: #2c2416;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #8b7355 0%, #6b5644 100%);
+            color: #f5f1e8;
+            border-bottom: 4px solid #4a3829;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .search-section {
+            background-color: #fff;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid #8b7355;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+
+        #searchInput {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: 2px solid #8b7355;
+            border-radius: 4px;
+            background-color: #fafaf8;
+            font-family: 'Georgia', serif;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: #6b5644;
+            background-color: #fff;
+        }
+
+        #searchButton {
+            padding: 12px 30px;
+            font-size: 1rem;
+            background-color: #8b7355;
+            color: #f5f1e8;
+            border: 2px solid #6b5644;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        #searchButton:hover {
+            background-color: #6b5644;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #searchButton:active {
+            transform: translateY(0);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #6b5644;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        @media (max-width: 1200px) {
+            .books-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .books-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .books-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .book-card {
+            background-color: #fff;
+            border: 3px solid #8b7355;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            border-color: #6b5644;
+        }
+
+        .book-image {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            border: 2px solid #d4c5b0;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            background-color: #f5f1e8;
+        }
+
+        .book-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c2416;
+            min-height: 50px;
+        }
+
+        .book-author {
+            font-size: 0.95rem;
+            color: #6b5644;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .book-date {
+            font-size: 0.9rem;
+            color: #8b7355;
+            margin-top: auto;
+            padding-top: 10px;
+            border-top: 1px solid #d4c5b0;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 40px 0;
+            padding: 20px;
+        }
+
+        .pagination button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #8b7355;
+            color: #f5f1e8;
+            border: 2px solid #6b5644;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background-color: #6b5644;
+            transform: scale(1.05);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            font-size: 1rem;
+            color: #2c2416;
+            font-weight: bold;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 1.2rem;
+            color: #6b5644;
+            background-color: #fff;
+            border: 2px solid #8b7355;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 20px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+            border-radius: 4px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        /* Estilos del Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 3% auto;
+            padding: 0;
+            border: 3px solid #8b7355;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 900px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease;
+            position: relative;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-button {
+            color: #6b5644;
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover {
+            color: #2c2416;
+        }
+
+        .modal-body {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            padding: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal-image-section {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .modal-image {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            border: 3px solid #d4c5b0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-info-section {
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            color: #2c2416;
+            margin-bottom: 10px;
+            padding-right: 40px;
+        }
+
+        .modal-author {
+            font-size: 1.2rem;
+            color: #6b5644;
+            font-style: italic;
+            margin-bottom: 8px;
+        }
+
+        .modal-date {
+            font-size: 1rem;
+            color: #8b7355;
+            margin-bottom: 20px;
+        }
+
+        .modal-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #d4c5b0;
+        }
+
+        .modal-section:last-child {
+            border-bottom: none;
+        }
+
+        .modal-section h3 {
+            font-size: 1.3rem;
+            color: #2c2416;
+            margin-bottom: 12px;
+        }
+
+        .modal-description {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #2c2416;
+            text-align: justify;
+        }
+
+        .modal-rating {
+            font-size: 1.1rem;
+            color: #2c2416;
+        }
+
+        .rating-stars {
+            color: #f4a261;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .modal-extra-info {
+            font-size: 0.95rem;
+            color: #2c2416;
+        }
+
+        .modal-extra-info p {
+            margin-bottom: 8px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #2c2416;
+            margin: 40px 0 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 2px solid #8b7355;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>📚 Buscador de Libros</h1>
+        <p class="subtitle">Explora millones de libros con Open Library</p>
+    </header>
+
+    <div class="container">
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Buscar por título, autor o tema..." autocomplete="off">
+                <button id="searchButton">Buscar</button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            Cargando libros...
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <h2 class="section-title" id="sectionTitle">📚 Libros Recomendados</h2>
+
+        <div class="books-grid" id="booksGrid"></div>
+
+        <div class="pagination" id="pagination" style="display: none;">
+            <button id="prevButton">← Anterior</button>
+            <span class="page-info" id="pageInfo">Página 1</span>
+            <button id="nextButton">Siguiente →</button>
+        </div>
+    </div>
+
+    <!-- Modal para detalles del libro -->
+    <div class="modal" id="bookModal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModal">&times;</span>
+            <div class="modal-body">
+                <div class="modal-image-section">
+                    <img id="modalImage" src="" alt="Portada del libro" class="modal-image">
+                </div>
+                <div class="modal-info-section">
+                    <h2 id="modalTitle" class="modal-title"></h2>
+                    <p id="modalAuthor" class="modal-author"></p>
+                    <p id="modalDate" class="modal-date"></p>
+
+                    <div class="modal-section">
+                        <h3>📖 Resumen</h3>
+                        <p id="modalDescription" class="modal-description">Cargando...</p>
+                    </div>
+
+                    <div class="modal-section">
+                        <h3>⭐ Valoración de Lectores</h3>
+                        <div id="modalRating" class="modal-rating">Cargando...</div>
+                    </div>
+
+                    <div class="modal-section">
+                        <h3>ℹ️ Información Adicional</h3>
+                        <div id="modalExtraInfo" class="modal-extra-info"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
